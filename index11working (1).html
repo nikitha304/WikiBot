@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chatbot</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #fff; 
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            padding: 20px;
+        }
+
+        .chat-container {
+            width: 60%;
+            height: 70%;
+            border: 1px solid #ccc;
+            background: url('\static\what.jpeg');
+            border-radius: 10px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            margin-right: 20px; 
+        }
+
+        .sidebar {
+            width: 20%;
+            height: 70%;
+            background: #4a47a3;
+            border-radius: 10px;
+            padding: 20px;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+
+        .sidebar h2 {
+            margin-top: 0;
+        }
+
+        .sidebar label {
+            width: 30%;
+            line-height: 35px;
+            padding: 20px;
+            border-radius: 10px;
+            margin-left: 10px; 
+        }
+
+        .chat-messages {
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .message {
+            margin: 10px;
+            padding: 10px;
+            border-radius: 10px;
+            width: fit-content;
+            max-width: 80%;
+            display: flex; 
+        }
+
+        .bot-message {
+            background-color: #f1f1f0;
+            color: #333;
+            margin-right: auto; 
+        }
+
+        .user-message {
+            background-color: #007bff;
+            color: white;
+            margin-left: auto; 
+        }
+
+        .chat-input {
+            display: flex;
+            margin-top: 10px;
+        }
+
+        .chat-input input {
+            flex-grow: 1;
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            margin-right: 10px;
+        }
+
+        .chat-input button {
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: none;
+            background-color: #5cb85c;
+            color: white;
+            cursor: pointer;
+            font-size: 16px; 
+        }
+
+        .chat-input button:hover {
+            background-color: #4cae4c;
+        }
+
+        .mode-toggle {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .switch input { 
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+        input:checked + .slider {
+            background-color: #2196F3;
+        }
+
+        input:checked + .slider:before {
+            -webkit-transform: translateX(26px);
+            -ms-transform: translateX(26px);
+            transform: translateX(26px);
+        }
+
+        .dark-mode {
+            background-color: #000;
+        }
+
+        .dark-mode .chat-container {
+            background: #555;
+            background: url('\static\what.jpeg');
+            color: #ddd;
+        }
+
+        .dark-mode .bot-message {
+            background-color: #777;
+            color: #ddd;
+        }
+
+         .chat-header {
+        background-color: #4a47a3; 
+        color: white;
+        padding: 20px;
+        text-align: center;
+        font-size: 1.5em;
+        border-radius: 20px;
+        }
+
+        .dark-mode .user-message {
+            background-color: #0062cc;
+        }
+
+        .dark-mode .sidebar {
+            background: #4a47a3;
+        }
+
+        .dark-mode .chat-input input {
+            color: #ddd;
+            border-color: #444;
+        }
+
+        .dark-mode .chat-input button {
+            color: #ddd;
+        }
+
+        #bg-change-label {
+            display: block;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #ddd;
+            color: #333;
+            padding: 0.5em;
+            border-radius: 10px;
+            cursor: pointer;
+            z-index: 2000;
+        }
+
+        #bg-change {
+            display: none;
+        }
+
+.probability-plots {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start; 
+    align-items: center; 
+    margin-top: 20px;
+}
+
+.probability-plot {
+    max-width: 45%;
+    height: 10%;
+    margin-bottom: 20px; 
+}
+
+    </style>
+</head>
+<body>
+    <div class="mode-toggle">
+        <label class="switch">
+            <input type="checkbox" id="dark-mode-checkbox" onchange="toggleMode()">
+            <span class="slider round"></span>
+        </label>
+    </div>
+
+    <input type="file" id="bg-change" accept="image/*" onchange="changeBackground()">
+    <label for="bg-change" id="bg-change-label"><i class="fa fa-image"></i> Change Background</label>
+
+    <div class="container">
+<div class="probability-plots">
+    <img id="query_resp_plot" class="probability-plot" src="" alt="Query Response Times">
+    <img id="length_time_plot" class="probability-plot" src="" alt="Length Of Query VS Time">
+    <img id="chitchat_query_plot" class="probability-plot" src="" alt="ChitChat vs Query Probability">
+    <img id="topic_plot" class="probability-plot" src="" alt="Topic Classification Probabilities">
+</div>
+
+
+        <div class="chat-container">
+            <div class="chat-header">RAN Bot</div>
+            <div class="chat-messages" id="chat-output"></div>
+            <div class="chat-input">
+                <input type="text" id="chat-input" placeholder="Type a message..." onkeydown="handleEnter(event)">
+                <button id="send-btn" onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+
+        <div class="sidebar">
+            <h2>Topics</h2>
+            <div class="topic"><input type="checkbox" id="Health"><label for="Health">Health</label></div>
+            <div class="topic"><input type="checkbox" id="environment"><label for="environment">Environment</label></div>
+            <div class="topic"><input type="checkbox" id="Technology"><label for="Technology">Technology</label></div>
+            <div class="topic"><input type="checkbox" id="Economy"><label for="Economy">Economy</label></div>
+            <div class="topic"><input type="checkbox" id="Entertainment"><label for="Entertainment">Entertainment</label></div>
+            <div class="topic"><input type="checkbox" id="Sports"><label for="sports">Sports</label></div>
+            <div class="topic"><input type="checkbox" id="politics"><label for="politics">Politics</label></div>
+            <div class="topic"><input type="checkbox" id="Education"><label for="Education">Education</label></div>
+            <div class="topic"><input type="checkbox" id="Travel"><label for="Travel">Travel</label></div>
+            <div class="topic"><input type="checkbox" id="food"><label for="Food">Food</label></div>
+        </div>
+    </div>
+
+
+    <script>
+        function handleEnter(event) {
+            if (event.key === 'Enter') {
+                if (!event.shiftKey) {
+                    event.preventDefault();
+                    sendMessage();
+                }
+            }
+                    }
+
+        function sendMessage() {
+    var input = document.getElementById("chat-input");
+    var message = input.value.trim();
+    if (message === '') return;
+
+    var selectedTopics = [];
+    var topics = document.querySelectorAll('.topic input[type=checkbox]:checked');
+    topics.forEach(function(topic) {
+        selectedTopics.push(topic.id);
+    });
+
+    displayMessage(message, 'user-message');
+    input.value = '';
+
+    fetch('/ask', {
+        method: 'POST',
+        body: new URLSearchParams({ 'user_input': message, 'selected_topics': JSON.stringify(selectedTopics) }),
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        }
+    })
+            .then(response => response.json())
+            .then(data => {
+                var botResponse = data.bot_response;
+                displayMessage(botResponse, 'bot-message');
+
+                document.getElementById('query_resp_plot').src = 'data:image/png;base64,' + data.query_resp_plot;
+                document.getElementById('length_time_plot').src = 'data:image/png;base64,' + data.length_time_plot;
+                document.getElementById('chitchat_query_plot').src = 'data:image/png;base64,' + data.chitchat_query_plot;
+                document.getElementById('topic_plot').src = 'data:image/png;base64,' + data.topic_plot;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                displayMessage("Error: Could not get response from server.", 'bot-message');
+            });
+        }
+
+        function displayMessage(message, className) {
+            var chatOutput = document.getElementById("chat-output");
+            var messageDiv = document.createElement("div");
+            messageDiv.textContent = message;
+            messageDiv.className = 'message ' + className;
+            chatOutput.appendChild(messageDiv);
+            chatOutput.scrollTop = chatOutput.scrollHeight;
+        }
+
+        function toggleMode() {
+            var checkBox = document.getElementById('dark-mode-checkbox');
+            var body = document.body;
+            
+            body.classList.toggle('dark-mode');
+            if (body.classList.contains('dark-mode')) {
+                body.style.backgroundColor = '#000';
+            } else {
+                body.style.backgroundColor = '#fff';
+            }
+        }
+
+        function changeBackground() {
+            var fileInput = document.getElementById('bg-change');
+            var file = fileInput.files[0];
+            if (file) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    document.body.style.backgroundImage = 'url(' + e.target.result + ')';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                document.body.style.backgroundImage = 'none';
+            }
+        }
+
+    </script>
+</body>
+</html>
+
