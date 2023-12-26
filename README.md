@@ -1,5 +1,16 @@
 # Wikipedia Question-Answering Bot
+
+## Contributors -
+* **Anuja Wani**
+* **Nikitha Sadananda**
+* **Rohan Eli**
+
+## Summary
 This chatbot is an AI-driven tool adept at processing diverse user queries with precision, using Blenderbot, T5 models, and ML classifiers. It leverages a 64k documents dataset for comprehensive topic coverage and is deployed on the Google Cloud Platform, showcasing scalable, responsive conversational AI.
+
+## Overview
+
+The dataset contains 64638 Wikipedia scrapped documents.
 
 ## index11working.html
 HTML interface for the chatbot, including layout and design elements.
