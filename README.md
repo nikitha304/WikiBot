@@ -1,1 +1,1 @@
-# WikiBot
+# Wikipedia Question-Answering Bot
